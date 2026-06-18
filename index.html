@@ -52,7 +52,12 @@
         .modal-content h3 { margin-top: 0; margin-bottom: 20px; }
         .source-options { display: flex; flex-direction: column; gap: 12px; }
         .btn-option { background-color: #f2f2f7 !important; color: #007aff !important; box-shadow: none !important; }
-        .btn-option:active { background-color: #e5e5ea !important; }
+        
+        /* 輸入框樣式 */
+        .fare-input {
+            width: 100%; font-size: 24px; padding: 12px; text-align: center; border: 1px solid #d1d1d6;
+            border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; -webkit-appearance: none;
+        }
 
         /* 底部管理區域 */
         .admin-section { border-top: 1px solid #e5e5ea; padding-top: 20px; text-align: center; }
@@ -61,7 +66,7 @@
         .btn-show { background-color: #3a3a3c !important; color: white !important; }
         .btn-clear { background-color: #e5e5ea !important; color: var(--danger) !important; }
         .record-display-box { display: none; margin-top: 15px; background: #f8f8fa; padding: 15px; border-radius: 12px; border: 1px solid #e5e5ea; }
-        textarea { width: 100%; height: 200px; font-family: monospace; font-size: 13px; border: 1px solid #d1d1d6; border-radius: 8px; padding: 10px; box-sizing: border-box; resize: none; background: white; }
+        textarea { width: 100%; height: 220px; font-family: monospace; font-size: 13px; border: 1px solid #d1d1d6; border-radius: 8px; padding: 10px; box-sizing: border-box; resize: none; background: white; }
     </style>
 </head>
 <body>
@@ -98,6 +103,14 @@
             <button class="btn-option" onclick="selectSource('高德')">高德</button>
             <button class="btn-option" onclick="selectSource('街客')">街客</button>
         </div>
+    </div>
+</div>
+
+<div id="fare-modal" class="modal">
+    <div class="modal-content">
+        <h3>輸入本單收入 ($)</h3>
+        <input type="number" id="input-fare" class="fare-input" pattern="[0-9]*" inputmode="numeric" placeholder="0" min="0">
+        <button onclick="submitFare()">確定儲存</button>
     </div>
 </div>
 
@@ -143,11 +156,11 @@
                     currentStep++;
                     updateUI();
                 } else {
-                    allRecords.push({...currentTripData});
-                    localStorage.setItem('taxi_records', JSON.stringify(allRecords));
-                    currentTripData = {};
-                    currentStep = 1;
-                    updateUI();
+                    // 到達目的地定位完成，彈出輸入收入視窗
+                    document.getElementById('fare-modal').style.display = 'flex';
+                    const fareInput = document.getElementById('input-fare');
+                    fareInput.value = '';
+                    setTimeout(() => fareInput.focus(), 100); // 自動聚焦方便輸入
                 }
             },
             (error) => {
@@ -168,7 +181,28 @@
         updateUI();
     }
 
-    // 生成給 AI 分析的格式
+    // 提交收入金額並正式儲存訂單
+    function submitFare() {
+        const fareValue = document.getElementById('input-fare').value;
+        
+        // 如果沒輸入，預設為 0
+        currentTripData['收入'] = fareValue ? parseFloat(fareValue) : 0;
+        
+        // 隱藏彈窗
+        document.getElementById('fare-modal').style.display = 'none';
+        
+        // 儲存整筆訂單
+        allRecords.push({...currentTripData});
+        localStorage.setItem('taxi_records', JSON.stringify(allRecords));
+        
+        // 重置狀態
+        currentTripData = {};
+        currentStep = 1;
+        alert('本單紀錄完成，營收已儲存！');
+        updateUI();
+    }
+
+    // 生成給 AI 分析的格式（加入收入金額）
     function generateTextRecords() {
         let output = "";
         allRecords.forEach((row, index) => {
@@ -180,7 +214,8 @@
             output += `開車時間: ${row['開車時間'] || ''}\n`;
             output += `開車地點: ${row['開車地點'] || ''}\n`;
             output += `到達目的地時間: ${row['到達目的地時間'] || ''}\n`;
-            output += `到達目的地地點: ${row['到達目的地地點'] || ''}\n\n`;
+            output += `到達目的地地點: ${row['到達目的地地點'] || ''}\n`;
+            output += `收入: $${row['收入'] !== undefined ? row['收入'] : 0}\n\n`; // 最底一行的收入
         });
         document.getElementById('txt-records').value = output.trim();
     }
