@@ -32,125 +32,29 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             box-sizing: border-box;
         }
-        h2 {
-            text-align: center;
-            margin-top: 0;
-            color: #1c1c1e;
-        }
-        .status-tracker {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
+        h2 { text-align: center; margin-top: 0; color: #1c1c1e; }
+        .status-tracker { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
         button {
-            font-size: 18px;
-            font-weight: 600;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            width: 100%;
-            -webkit-tap-highlight-color: transparent;
+            font-size: 18px; font-weight: 600; padding: 16px; border: none; border-radius: 12px;
+            cursor: pointer; transition: all 0.2s ease; width: 100%; -webkit-tap-highlight-color: transparent;
         }
-        button:not(:disabled) {
-            background-color: var(--primary);
-            color: white;
-            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
-        }
-        button:not(:disabled):active {
-            transform: scale(0.98);
-            opacity: 0.9;
-        }
-        button:disabled {
-            background-color: #e5e5ea;
-            color: #aeaeae;
-            cursor: not-allowed;
-        }
-        #btn-finish:not(:disabled) {
-            background-color: var(--success);
-            box-shadow: 0 4px 10px rgba(52, 199, 89, 0.3);
-        }
-        
-        /* 彈出視窗樣式 */
+        button:not(:disabled) { background-color: var(--primary); color: white; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3); }
+        button:disabled { background-color: #e5e5ea; color: #aeaeae; cursor: not-allowed; }
+        #btn-finish:not(:disabled) { background-color: var(--success); box-shadow: 0 4px 10px rgba(52, 199, 89, 0.3); }
         .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;
         }
-        .modal-content {
-            background: white;
-            padding: 24px;
-            border-radius: 16px;
-            width: 85%;
-            max-width: 320px;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        .modal-content h3 {
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-        .source-options {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .btn-option {
-            background-color: #f2f2f7 !important;
-            color: #007aff !important;
-            box-shadow: none !important;
-        }
-
-        /* 底部管理區域 */
-        .admin-section {
-            border-top: 1px solid #e5e5ea;
-            padding-top: 20px;
-            text-align: center;
-        }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .btn-action {
-            font-size: 14px;
-            padding: 10px;
-            margin: 0;
-        }
-        .btn-show {
-            background-color: #3a3a3c !important;
-            color: white !important;
-        }
-        .btn-clear {
-            background-color: #e5e5ea !important;
-            color: var(--danger) !important;
-        }
-        .record-display-box {
-            display: none;
-            margin-top: 15px;
-            background: #f8f8fa;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #e5e5ea;
-        }
-        textarea {
-            width: 100%;
-            height: 200px;
-            font-family: monospace;
-            font-size: 13px;
-            border: 1px solid #d1d1d6;
-            border-radius: 8px;
-            padding: 10px;
-            box-sizing: border-box;
-            resize: none;
-            background: white;
-        }
+        .modal-content { background: white; padding: 24px; border-radius: 16px; width: 85%; max-width: 320px; text-align: center; }
+        .source-options { display: flex; flex-direction: column; gap: 12px; }
+        .btn-option { background-color: #f2f2f7 !important; color: #007aff !important; }
+        .admin-section { border-top: 1px solid #e5e5ea; padding-top: 20px; text-align: center; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn-action { font-size: 14px; padding: 10px; margin: 0; }
+        .btn-show { background-color: #3a3a3c !important; color: white !important; }
+        .btn-clear { background-color: #e5e5ea !important; color: var(--danger) !important; }
+        .record-display-box { display: none; margin-top: 15px; background: #f8f8fa; padding: 15px; border-radius: 12px; }
+        textarea { width: 100%; height: 200px; font-family: monospace; font-size: 13px; padding: 10px; box-sizing: border-box; resize: none; }
     </style>
 </head>
 <body>
@@ -198,3 +102,143 @@
     function updateUI() {
         document.getElementById('btn-order').disabled = (currentStep !== 1);
         document.getElementById('btn-arrive').disabled = (currentStep !== 2);
+        document.getElementById('btn-start').disabled = (currentStep !== 3);
+        document.getElementById('btn-finish').disabled = (currentStep !== 4);
+        document.getElementById('log-count').innerText = `目前已儲存: ${allRecords.length} 條完整紀錄`;
+        generateTextRecords();
+    }
+
+    function recordStatus(step, statusName) {
+        if (step !== currentStep) return;
+
+        // 【偵錯警報 1】檢查按鈕點擊有沒有觸發
+        alert(`[偵錯 1] 已按下「${statusName}」，準備向 iPhone 申請 GPS 定位...`);
+
+        if (!navigator.geolocation) {
+            alert("[錯誤] 您的瀏覽器完全不支援 GPS 定位功能！");
+            return;
+        }
+
+        const currentBtn = document.querySelectorAll('.status-tracker button')[step-1];
+        const originalText = currentBtn.innerText;
+        currentBtn.innerText = "定位中...";
+        currentBtn.disabled = true;
+
+        // 呼叫手機 GPS
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                // 【偵錯警報 2】成功抓到定位
+                alert("[偵錯 2] 成功成功！已抓取到 GPS 數據。");
+
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const locString = `${lat},${lng}`;
+                
+                const now = new Date();
+                const timeString = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+                currentTripData[`${statusName}時間`] = timeString;
+                currentTripData[`${statusName}地點`] = locString;
+
+                currentBtn.innerText = originalText;
+
+                if (step === 1) {
+                    document.getElementById('source-modal').style.display = 'flex';
+                } else if (step < 4) {
+                    currentStep++;
+                    updateUI();
+                } else {
+                    allRecords.push({...currentTripData});
+                    localStorage.setItem('taxi_records', JSON.stringify(allRecords));
+                    currentTripData = {};
+                    currentStep = 1;
+                    alert('本單紀錄完成！數據已儲存。');
+                    updateUI();
+                }
+            },
+            (error) => {
+                // 【偵錯警報 3】定位失敗，彈出具體原因
+                currentBtn.innerText = originalText;
+                let errorMsg = "";
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMsg = "您拒絕了位置存取權限。請檢查瀏覽器或網頁設定。";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMsg = "位置資訊不可用（可能訊號不良或室內收不到 GPS）。";
+                        break;
+                    case error.TIMEOUT:
+                        errorMsg = "定位逾時，等太久抓不到位置。";
+                        break;
+                    default:
+                        errorMsg = error.message;
+                }
+                alert('[定位失敗原因] ' + errorMsg);
+                updateUI();
+            },
+            // 降低一點點精確度度要求，防止因為要極度精準而無限期卡死
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 0 }
+        );
+    }
+
+    function selectSource(sourceName) {
+        currentTripData['訂單來源'] = sourceName;
+        document.getElementById('source-modal').style.display = 'none';
+        currentStep = 2;
+        updateUI();
+    }
+
+    function generateTextRecords() {
+        let output = "";
+        allRecords.forEach((row, index) => {
+            output += `${index + 1}. ${row['訂單來源'] || '未知平台'}\n`;
+            output += `接單時間: ${row['接單時間'] || ''}\n`;
+            output += `接單地點: ${row['接單地點'] || ''}\n`;
+            output += `到達起點時間: ${row['到達起點時間'] || ''}\n`;
+            output += `到達起點地點: ${row['到達起點地點'] || ''}\n`;
+            output += `開車時間: ${row['開車時間'] || ''}\n`;
+            output += `開車地點: ${row['開車地點'] || ''}\n`;
+            output += `到達目的地時間: ${row['到達目的地時間'] || ''}\n`;
+            output += `到達目的地地點: ${row['到達目的地地點'] || ''}\n\n`;
+        });
+        document.getElementById('txt-records').value = output.trim();
+    }
+
+    function toggleRecords() {
+        const box = document.getElementById('record-box');
+        box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+        if (box.style.display === 'block') generateTextRecords();
+    }
+
+    function clearRecords() {
+        if (allRecords.length === 0) { alert('目前本來就沒有紀錄。'); return; }
+        const check = confirm("⚠️ 確定要清除今日的所有紀錄嗎？");
+        if (check) {
+            allRecords = [];
+            localStorage.removeItem('taxi_records');
+            currentTripData = {};
+            currentStep = 1;
+            document.getElementById('record-box').style.display = 'none';
+            updateUI();
+            alert('紀錄已全部清空！');
+        }
+    }
+
+    function copyToClipboard() {
+        const textarea = document.getElementById('txt-records');
+        if (!textarea.value) { alert('沒有紀錄可以複製！'); return; }
+        textarea.select();
+        textarea.setSelectionRange(0, 99999);
+        try {
+            navigator.clipboard.writeText(textarea.value).then(() => { alert('已成功複製！'); });
+        } catch (err) {
+            document.execCommand('copy');
+            alert('已成功複製！');
+        }
+    }
+
+    updateUI();
+</script>
+
+</body>
+</html>
