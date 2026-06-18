@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>的士駕駛生意紀錄</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary: #007aff;
+            --success: #34c759;
+            --danger: #ff3b30;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #1c1c1e;
+        }
+        .status-tracker {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        button {
+            font-size: 18px;
+            font-weight: 600;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            -webkit-tap-highlight-color: transparent;
+        }
+        button:not(:disabled) {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
+        }
+        button:not(:disabled):active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+        button:disabled {
+            background-color: #e5e5ea;
+            color: #aeaeae;
+            cursor: not-allowed;
+        }
+        #btn-finish:not(:disabled) {
+            background-color: var(--success);
+            box-shadow: 0 4px 10px rgba(52, 199, 89, 0.3);
+        }
+        
+        /* 彈出視窗樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            width: 85%;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .source-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .btn-option {
+            background-color: #f2f2f7 !important;
+            color: #007aff !important;
+            box-shadow: none !important;
+        }
+
+        /* 底部管理區域 */
+        .admin-section {
+            border-top: 1px solid #e5e5ea;
+            padding-top: 20px;
+            text-align: center;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .btn-action {
+            font-size: 14px;
+            padding: 10px;
+            margin: 0;
+        }
+        .btn-show {
+            background-color: #3a3a3c !important;
+            color: white !important;
+        }
+        .btn-clear {
+            background-color: #e5e5ea !important;
+            color: var(--danger) !important;
+        }
+        .record-display-box {
+            display: none;
+            margin-top: 15px;
+            background: #f8f8fa;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #e5e5ea;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-family: monospace;
+            font-size: 13px;
+            border: 1px solid #d1d1d6;
+            border-radius: 8px;
+            padding: 10px;
+            box-sizing: border-box;
+            resize: none;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>的士生意紀錄系統</h2>
+    
+    <div class="status-tracker">
+        <button id="btn-order" onclick="recordStatus(1, '接單')">1. 接單</button>
+        <button id="btn-arrive" onclick="recordStatus(2, '到達起點')" disabled>2. 到達起點</button>
+        <button id="btn-start" onclick="recordStatus(3, '開車')" disabled>3. 開車</button>
+        <button id="btn-finish" onclick="recordStatus(4, '到達目的地')" disabled>4. 到達目的地</button>
+    </div>
+
+    <div class="admin-section">
+        <div class="btn-group">
+            <button class="btn-action btn-show" onclick="toggleRecords()">顯示 / 複製紀錄</button>
+            <button class="btn-action btn-clear" onclick="clearRecords()">清除紀錄 (收工)</button>
+        </div>
+        <div id="log-count" style="font-size: 14px; color: #636366;">目前已儲存: 0 條完整紀錄</div>
+        
+        <div id="record-box" class="record-display-box">
+            <textarea id="txt-records" readonly placeholder="暫無紀錄..."></textarea>
+            <button class="btn-action" style="background-color: #007aff !important; margin-top: 10px; color: white !important;" onclick="copyToClipboard()">一鍵複製全部文字</button>
+        </div>
+    </div>
+</div>
+
+<div id="source-modal" class="modal">
+    <div class="modal-content">
+        <h3>請選擇訂單來源</h3>
+        <div class="source-options">
+            <button class="btn-option" onclick="selectSource('Uber')">Uber</button>
+            <button class="btn-option" onclick="selectSource('高德')">高德</button>
+            <button class="btn-option" onclick="selectSource('街客')">街客</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentStep = 1;
+    let currentTripData = {};
+    let allRecords = JSON.parse(localStorage.getItem('taxi_records')) || [];
+
+    function updateUI() {
+        document.getElementById('btn-order').disabled = (currentStep !== 1);
+        document.getElementById('btn-arrive').disabled = (currentStep !== 2);
