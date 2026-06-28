@@ -76,7 +76,7 @@
         .btn-show { background-color: var(--primary) !important; color: white !important; box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2); }
         .btn-clear { background-color: #e5e5ea !important; color: var(--danger) !important; }
         
-        /* 紀錄顯示方塊改為永久直顯 */
+        /* 紀錄顯示方塊 */
         .record-display-box { display: block; margin-top: 15px; background: #f8f8fa; padding: 15px; border-radius: 12px; border: 1px solid #e5e5ea; }
         textarea { width: 100%; height: 200px; font-family: monospace; font-size: 13px; border: 1px solid #d1d1d6; border-radius: 8px; padding: 10px; box-sizing: border-box; resize: none; background: white; }
     </style>
@@ -89,8 +89,7 @@
     <div class="status-tracker">
         <button id="btn-order" onclick="recordStatus(1, '接單')">1. 接單</button>
         <button id="btn-arrive" onclick="recordStatus(2, '到達起點')" disabled>2. 到達起點</button>
-        <button id="btn-start" onclick="recordStatus(3, '開車')" disabled>3. 開車</button>
-        <button id="btn-finish" onclick="recordStatus(4, '到達目的地')" disabled>4. 到達目的地</button>
+        <button id="btn-finish" onclick="recordStatus(3, '到達目的地')" disabled>3. 到達目的地</button>
         
         <button id="btn-cancel-trip" class="btn-cancel-order" onclick="cancelCurrentTrip()">取消當前訂單</button>
     </div>
@@ -151,8 +150,7 @@
     function updateUI() {
         document.getElementById('btn-order').disabled = (currentStep !== 1);
         document.getElementById('btn-arrive').disabled = (currentStep !== 2);
-        document.getElementById('btn-start').disabled = (currentStep !== 3);
-        document.getElementById('btn-finish').disabled = (currentStep !== 4);
+        document.getElementById('btn-finish').disabled = (currentStep !== 3);
         
         if (currentStep > 1) {
             document.getElementById('btn-cancel-trip').style.display = 'block';
@@ -177,7 +175,8 @@
     function recordStatus(step, statusName) {
         if (step !== currentStep) return;
 
-        const currentBtn = document.querySelectorAll('.status-tracker button')[step-1];
+        const btns = [document.getElementById('btn-order'), document.getElementById('btn-arrive'), document.getElementById('btn-finish')];
+        const currentBtn = btns[step-1];
         const originalText = currentBtn.innerText;
         currentBtn.innerText = "定位中...";
         currentBtn.disabled = true;
@@ -198,7 +197,7 @@
 
                 if (step === 1) {
                     document.getElementById('source-modal').style.display = 'flex';
-                } else if (step < 4) {
+                } else if (step < 3) {
                     currentStep++;
                     saveCurrentState();
                     updateUI();
@@ -225,11 +224,10 @@
         document.getElementById('source-modal').style.display = 'none';
         
         if (sourceName === '街客') {
+            // 街客跳關：直接將接單的定位複製給「到達起點」，並直跳第 3 步（到達目的地）
             currentTripData['到達起點時間'] = currentTripData['接單時間'];
             currentTripData['到達起點地點'] = currentTripData['接單地點'];
-            currentTripData['開車時間'] = currentTripData['接單時間'];
-            currentTripData['開車地點'] = currentTripData['接單地點'];
-            currentStep = 4;
+            currentStep = 3;
         } else {
             currentStep = 2;
         }
@@ -291,8 +289,6 @@
             output += `接單地點: ${row['接單地點'] || ''}\n`;
             output += `到達起點時間: ${row['到達起點時間'] || ''}\n`;
             output += `到達起點地點: ${row['到達起點地點'] || ''}\n`;
-            output += `開車時間: ${row['開車時間'] || ''}\n`;
-            output += `開車地點: ${row['開車地點'] || ''}\n`;
             output += `到達目的地時間: ${row['到達目的地時間'] || ''}\n`;
             output += `到達目的地地點: ${row['到達目的地地點'] || ''}\n`;
             output += `收入: $${row['收入'] !== undefined ? row['收入'] : 0}\n\n`;
