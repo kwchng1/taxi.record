@@ -69,6 +69,11 @@
             border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; -webkit-appearance: none;
         }
 
+        /* 彈窗按鈕群組（確認/取消） */
+        .modal-btn-group { display: flex; gap: 12px; }
+        .modal-btn-group button { font-size: 16px; padding: 12px; }
+        .btn-modal-cancel { background-color: #e5e5ea !important; color: #333333 !important; box-shadow: none !important; }
+
         /* 底部管理區域 */
         .admin-section { border-top: 1px solid #e5e5ea; padding-top: 20px; text-align: center; }
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
@@ -131,7 +136,10 @@
     <div class="modal-content">
         <h3>輸入本單收入 ($)</h3>
         <input type="number" id="input-fare" class="custom-input" pattern="[0-9]*" inputmode="numeric" placeholder="0" min="0">
-        <button onclick="submitFare()">確定儲存</button>
+        <div class="modal-btn-group">
+            <button class="btn-modal-cancel" onclick="cancelFareInput()">取消</button>
+            <button onclick="submitFare()">確定儲存</button>
+        </div>
     </div>
 </div>
 
@@ -224,7 +232,6 @@
         document.getElementById('source-modal').style.display = 'none';
         
         if (sourceName === '街客') {
-            // 街客跳關：直接將接單的定位複製給「到達起點」，並直跳第 3 步（到達目的地）
             currentTripData['到達起點時間'] = currentTripData['接單時間'];
             currentTripData['到達起點地點'] = currentTripData['接單地點'];
             currentStep = 3;
@@ -263,6 +270,17 @@
             updateUI();
             alert('當前訂單已取消，已重置回接單狀態。');
         }
+    }
+
+    // 新增：收入輸入的取消功能
+    function cancelFareInput() {
+        // 隱藏彈窗
+        document.getElementById('fare-modal').style.display = 'none';
+        // 移除剛剛誤觸產生的「到達目的地」數據，退回未點擊前的狀態
+        delete currentTripData['到達目的地時間'];
+        delete currentTripData['到達目的地地點'];
+        // 保持 currentStep = 3（即仍可重新按「3. 到達目的地」）
+        updateUI();
     }
 
     function submitFare() {
